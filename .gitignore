@@ -1,0 +1,21 @@
+# secretos (regla VSL)
+.env*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+.rotated-secrets.txt
+wg*.conf
+# datos de cliente y evidencia generada — NUNCA al repo
+forensic_out/
+*_evidencia.zip
+*.xlsx
+*.xls
+*.csv
+!ejemplo*.csv
+# perfiles específicos de cliente (contienen nombre de cliente)
+*.profile.json
+!ejemplo.profile.json
+__pycache__/
+*.pyc

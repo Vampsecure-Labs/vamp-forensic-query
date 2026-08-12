@@ -1,0 +1,6 @@
+{
+  "descripcion": "Ejemplo: export de cambios de contrasena con campos en una sola columna",
+  "sep": ";",
+  "action_const": "password_change",
+  "map": { "entity": "Usuario", "ts": "CreatedAt", "ip": "Datos" }
+}
