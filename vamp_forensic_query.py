@@ -29,8 +29,20 @@ import argparse, csv, json, os, re, sqlite3, sys, hashlib, zipfile, io, datetime
 def _utcnow():
     return _dt.datetime.now(_dt.timezone.utc).replace(tzinfo=None)
 
-VERSION = "1.0"
+VERSION = "1.1"
 TOOL = "vamp-forensic-query"
+
+BANNER = (
+    "\n"
+    "  ____   ____    _    __  __ ____  _____ ____ _   _ ____  _____   _        _    ____ ____\n"
+    " \\ \\ / / _  |  / \\  |  \\/  |  _ \\/ ____/ ___| | | |  _ \\| ____| | |      / \\  | __ ) ___|\n"
+    "  \\ V / (_| | / _ \\ | |\\/| | |_) \___ \\| |___| | | | |_) |  _|   | |     / _ \\ |  _ \___ \\\n"
+    "   | |  \\__, |/ ___ \\| |  | |  __/ ___) |___  | |_| |  _ <| |___  | |___ / ___ \\| |_) |__) |\n"
+    "   |_|     /_/_/   \_|_|  |_|_|   |____/\\____|\\___/|_| \_|_____| |_____/_/   \_|____/____/\n"
+    '     by Antonio Hernandez "Belky" — VampSecure Studios · vamp-forensic-query v1.1 · Forensic Query Engine\n'
+    "     ─────────────────────────────────────────────────────────────────────────────────────────\n"
+    "     USO EXCLUSIVO EN AUDITORÍAS AUTORIZADAS · El uso no autorizado es ilegal\n"
+)
 
 # ─────────────────────── clasificación de entidades (España) ───────────────────────
 _RE = {
