@@ -19,3 +19,4 @@ forensic_out/
 !ejemplo.profile.json
 __pycache__/
 *.pyc
+CLAUDE.md
