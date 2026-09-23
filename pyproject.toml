@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vamp-forensic-query"
-version = "1.1"
+version = "1.2"
 description = "Forensic SQL/log query engine for authorized digital investigations"
 readme = "README.md"
 license = { text = "MIT" }

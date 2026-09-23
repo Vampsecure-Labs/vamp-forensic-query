@@ -1,0 +1,2 @@
+[console_scripts]
+vamp-forensic-query = vamp_forensic_query:main

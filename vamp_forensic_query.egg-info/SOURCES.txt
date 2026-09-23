@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+vamp_forensic_query.py
+vamp_forensic_query.egg-info/PKG-INFO
+vamp_forensic_query.egg-info/SOURCES.txt
+vamp_forensic_query.egg-info/dependency_links.txt
+vamp_forensic_query.egg-info/entry_points.txt
+vamp_forensic_query.egg-info/top_level.txt
