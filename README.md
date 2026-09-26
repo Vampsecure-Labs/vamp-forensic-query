@@ -1,3 +1,4 @@
+<!-- © VampSecure Studios — VampSecure Labs Security Research Division -->
 # vamp-forensic-query
 
 © VampSecure Studios — VampSecure Labs Security Research Division
@@ -72,9 +73,22 @@ Cada consulta con `--evidence` produce en `--out`:
 de custodia; cualquier alteración de un artefacto rompe su hash en el `MANIFEST`. Los resultados son
 verificables reejecutando la consulta indicada sobre ficheros de idéntico hash.
 
+## Instalación
+
+```bash
+pip install vamp-forensic-query
+# o con Homebrew:
+brew install vampsecure-labs/labs/vamp-forensic-query
+```
+
 ## Requisitos
 - Python 3.9+ (stdlib). Para fuentes `.xlsx`: `pip install pandas openpyxl`.
 
 ## Prefijo de hallazgos
 No aplica (es una herramienta de consulta/evidencia, no de detección). Complementa a
 `vamp-log-analyzer` (detección FORA-NNN) aportando la capa de consulta ad-hoc + evidencia.
+
+---
+
+## Versión
+v1.2 — VampSecure Labs Security Research Division
