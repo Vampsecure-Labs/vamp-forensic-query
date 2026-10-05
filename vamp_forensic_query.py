@@ -24,7 +24,19 @@ Ejemplos:
   # Reincidentes (>=3 cambios) de cualquier tipo, con evidencia
   vamp_forensic_query.py ... top --action password_change --year 2026 --min-count 3 --evidence
 """
-import argparse, csv, json, os, re, sqlite3, sys, hashlib, zipfile, io, datetime as _dt, struct
+import argparse
+import csv
+import datetime as _dt
+import hashlib
+import io
+import json
+import os
+import re
+import sqlite3
+import struct
+import sys
+import zipfile
+
 
 def _utcnow():
     return _dt.datetime.now(_dt.timezone.utc).replace(tzinfo=None)
@@ -98,9 +110,9 @@ def cadena_custodia(paths, analyst, case):
             ficheros.append({"ruta": os.path.abspath(p), "nombre": os.path.basename(p),
                              "sha256": sha256_file(p), "tamaño_bytes": os.path.getsize(p)})
         except Exception as e:
-            ficheros.append({"ruta": p, "nombre": os.path.basename(p), "sha256": "ERROR:%s" % e, "tamaño_bytes": 0})
+            ficheros.append({"ruta": p, "nombre": os.path.basename(p), "sha256": f"ERROR:{e}", "tamaño_bytes": 0})
     return {
-        "herramienta": "%s v%s" % (TOOL, VERSION),
+        "herramienta": f"{TOOL} v{VERSION}",
         "caso": case or "(sin referencia)",
         "analista": analyst or "(sin identificar)",
         "generado_utc": _utcnow().isoformat() + "Z",
@@ -210,7 +222,7 @@ def q_events(db, args):
 def q_sql(db, args):
     if not args.sql:
         sys.exit("--sql requiere la sentencia SELECT")
-    if not re.match(r"^\s*select\b", args.sql, re.I):
+    if not re.match(r"^\s*select\b", args.sql, re.IGNORECASE):
         sys.exit("Por seguridad solo se permiten SELECT en --sql")
     cur = db.execute(args.sql)
     cols = [c[0] for c in cur.description]
@@ -226,10 +238,10 @@ def _rows_for_csv(res):
 def write_outputs(res, coc, args):
     os.makedirs(args.out, exist_ok=True)
     stamp = _utcnow().strftime("%Y%m%dT%H%M%SZ")
-    base = os.path.join(args.out, "%s_%s" % (res["consulta"], stamp))
+    base = os.path.join(args.out, "{}_{}".format(res["consulta"], stamp))
     files = {}
     # JSON (resultado + metadatos de reproducibilidad)
-    meta = {"herramienta": "%s v%s" % (TOOL, VERSION), "caso": args.case, "analista": args.analyst,
+    meta = {"herramienta": f"{TOOL} v{VERSION}", "caso": args.case, "analista": args.analyst,
             "generado_utc": _utcnow().isoformat() + "Z",
             "consulta_reproducible": " ".join(_reproducible_args()), "resultado": res, "cadena_custodia": coc}
     with open(base + ".json", "w", encoding="utf-8") as f:
@@ -259,12 +271,12 @@ def _reproducible_args():
     return out
 
 def empaquetar(zip_path, coc, meta, res, args):
-    manifest = ["# MANIFEST.sha256 — %s v%s" % (TOOL, VERSION),
-                "# caso: %s   analista: %s" % (args.case, args.analyst),
-                "# generado: %s" % meta["generado_utc"], ""]
+    manifest = [f"# MANIFEST.sha256 — {TOOL} v{VERSION}",
+                f"# caso: {args.case}   analista: {args.analyst}",
+                "# generado: {}".format(meta["generado_utc"]), ""]
     def add(zf, arc, data):
         zf.writestr(arc, data)
-        manifest.append("%s  %s" % (hashlib.sha256(data).hexdigest(), arc))
+        manifest.append(f"{hashlib.sha256(data).hexdigest()}  {arc}")
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         add(zf, "resultado.json", json.dumps(meta, ensure_ascii=False, indent=2).encode())
         rows = _rows_for_csv(res)
@@ -277,19 +289,20 @@ def empaquetar(zip_path, coc, meta, res, args):
         zf.writestr("MANIFEST.sha256", "\n".join(manifest).encode())
 
 def render_html(res, coc, meta):
-    esc = lambda s: (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
+    def esc(s):
+        return (str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;"))
     rows = _rows_for_csv(res)
-    head = "".join("<th>%s</th>" % esc(k) for k in (rows[0].keys() if rows else []))
-    body = "".join("<tr>" + "".join("<td>%s</td>" % esc(v) for v in r.values()) + "</tr>" for r in rows[:5000])
+    head = "".join(f"<th>{esc(k)}</th>" for k in (rows[0].keys() if rows else []))
+    body = "".join("<tr>" + "".join(f"<td>{esc(v)}</td>" for v in r.values()) + "</tr>" for r in rows[:5000])
     coc_rows = "".join(
-        "<tr><td>%s</td><td class=mono>%s</td><td>%s B</td></tr>" % (esc(f["nombre"]), esc(f["sha256"]), f["tamaño_bytes"])
+        "<tr><td>{}</td><td class=mono>{}</td><td>{} B</td></tr>".format(esc(f["nombre"]), esc(f["sha256"]), f["tamaño_bytes"])
         for f in coc["ficheros_fuente"])
     tipo = ""
     if res.get("por_tipo"):
         tipo = "<h3>Distribución por tipo de entidad</h3><table><tr><th>Tipo</th><th>Entidades</th><th>Eventos</th></tr>" + \
-               "".join("<tr><td>%s</td><td>%s</td><td>%s</td></tr>" % (t["tipo"], t["entidades"], t["eventos"]) for t in res["por_tipo"]) + "</table>"
-    resumen = "<li>Entidades distintas: <b>%s</b></li>" % res.get("entidades_distintas", "—") if "entidades_distintas" in res else ""
-    resumen += "<li>Eventos: <b>%s</b></li>" % res.get("total_eventos", res.get("eventos", len(rows)))
+               "".join("<tr><td>{}</td><td>{}</td><td>{}</td></tr>".format(t["tipo"], t["entidades"], t["eventos"]) for t in res["por_tipo"]) + "</table>"
+    resumen = "<li>Entidades distintas: <b>{}</b></li>".format(res.get("entidades_distintas", "—")) if "entidades_distintas" in res else ""
+    resumen += "<li>Eventos: <b>{}</b></li>".format(res.get("total_eventos", res.get("eventos", len(rows))))
     return f"""<!doctype html><html lang=es><meta charset=utf-8>
 <title>Informe forense — {esc(meta['caso'])} — {esc(res['consulta'])}</title>
 <style>
@@ -822,7 +835,7 @@ def main():
 
     res = QUERIES[args.query](db, args)
     coc = cadena_custodia(args.sources, args.analyst, args.case)
-    files, base = write_outputs(res, coc, args)
+    files, _base = write_outputs(res, coc, args)
 
     # resumen a stdout
     if args.query in ("distinct", "top"):

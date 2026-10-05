@@ -7,29 +7,23 @@ forenses y verifica resultados y paquetes de evidencia ZIP.
 Mínimo 5 tests de integración.
 """
 
-import sys
 import csv
-import json
 import hashlib
-import zipfile
 import sqlite3
+import sys
+import zipfile
 from pathlib import Path
-
-import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from vamp_forensic_query import (
+    cadena_custodia,
+    empaquetar,
     ingest,
     q_distinct,
-    q_top,
     q_timeline,
-    cadena_custodia,
-    sha256_file,
-    empaquetar,
-    render_html,
+    q_top,
 )
-
 
 # ── Helpers de fixtures locales ───────────────────────────────────────────────
 

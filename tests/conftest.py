@@ -6,17 +6,16 @@ Proporciona bases de datos SQLite en memoria, ficheros CSV de prueba y
 configuraciones de args para test_unit.py y test_integration.py.
 """
 
-import sys
-import sqlite3
 import csv
-import datetime
-import pytest
+import sqlite3
+import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from vamp_forensic_query import ingest, clasificar, parse_ts
-
+from vamp_forensic_query import ingest
 
 # ── Datos de prueba (CSV) ────────────────────────────────────────────────────
 

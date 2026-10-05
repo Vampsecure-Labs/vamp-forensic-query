@@ -8,10 +8,9 @@ filtrado por IP y separador configurable.
 Mínimo 12 tests unitarios independientes.
 """
 
-import sys
-import hashlib
-import sqlite3
 import datetime
+import hashlib
+import sys
 from pathlib import Path
 
 import pytest
@@ -19,15 +18,14 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from vamp_forensic_query import (
+    cadena_custodia,
     clasificar,
     parse_ts,
-    sha256_file,
     q_distinct,
-    q_top,
     q_timeline,
-    cadena_custodia,
+    q_top,
+    sha256_file,
 )
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 1. Clasificación de entidades
