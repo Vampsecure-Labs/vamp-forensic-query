@@ -12,13 +12,13 @@ y cadena de custodia (SHA-256 de las fuentes originales).
 
 Ejemplos:
   # ¿Cuántos DNI distintos cambiaron contraseña en 2026, cuáles y cuántas veces?
-  vamp_forensic_query.py AqualiaContrasenas.xlsx \
+  vamp_forensic_query.py usuarios.xlsx \
       --map entity=Usuario ts=CreatedAt ip=Datos --sep ';' --action-const password_change \
       distinct --year 2026 --entity-type DNI \
-      --case "AQUALIA-2026-001" --analyst "A. Hernández — VampSecure" --evidence
+      --case "CASO-2026-001" --analyst "A. Hernández — VampSecure" --evidence
 
   # Cronología exacta de una entidad
-  vamp_forensic_query.py AqualiaContrasenas.xlsx --map entity=Usuario ts=CreatedAt ip=Datos --sep ';' \
+  vamp_forensic_query.py eventos.xlsx --map entity=Usuario ts=CreatedAt ip=Datos --sep ';' \
       timeline --entity 11723541G
 
   # Reincidentes (>=3 cambios) de cualquier tipo, con evidencia
