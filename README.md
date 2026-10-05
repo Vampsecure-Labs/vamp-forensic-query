@@ -1,4 +1,6 @@
 <!-- © VampSecure Studios — VampSecure Labs Security Research Division -->
+
+  <img src="https://github.com/Vampsecure-Labs/vamp-forensic-query/actions/workflows/ci.yml/badge.svg" alt="CI"/>
 # vamp-forensic-query
 
 © VampSecure Studios — VampSecure Labs Security Research Division
