@@ -92,5 +92,10 @@ No aplica (es una herramienta de consulta/evidencia, no de detección). Compleme
 
 ---
 
-## Versión
-v1.2 — VampSecure Labs Security Research Division
+## Historial de versiones
+
+| Versión | Cambios principales |
+|---------|---------------------|
+| v1.3 | Modo streaming para logs >500 MB: `_read_rows` es generador (cero materialización en RAM), SQLite en disco automático cuando fuente ≥500 MB; flag `--stream` para forzarlo |
+| v1.2 | Análisis binario (PE/ELF/ZIP/MACH-O), cadena de custodia mejorada |
+| v1.1 | Consultas avanzadas, paquete ZIP de evidencia firmado SHA-256 |

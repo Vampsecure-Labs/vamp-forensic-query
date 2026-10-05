@@ -29,7 +29,7 @@ import argparse, csv, json, os, re, sqlite3, sys, hashlib, zipfile, io, datetime
 def _utcnow():
     return _dt.datetime.now(_dt.timezone.utc).replace(tzinfo=None)
 
-VERSION = "1.2"
+VERSION = "1.3"
 TOOL = "vamp-forensic-query"
 
 BANNER = (
@@ -109,7 +109,7 @@ def cadena_custodia(paths, analyst, case):
 
 # ─────────────────────── ingesta → SQLite ───────────────────────
 def _read_rows(path, sep):
-    """Devuelve lista de dicts (cabecera->valor) desde CSV o XLSX."""
+    """Itera dicts (cabecera->valor) desde CSV o XLSX sin materializar en RAM."""
     ext = os.path.splitext(path)[1].lower()
     if ext in (".xlsx", ".xls"):
         try:
@@ -117,16 +117,17 @@ def _read_rows(path, sep):
         except ImportError:
             sys.exit("ERROR: para XLSX se necesita pandas+openpyxl (pip install pandas openpyxl)")
         df = pd.read_excel(path, header=0, dtype=str)
-        # si toda la fila viene en una sola columna separada por 'sep', re-split
         if sep and len(df.columns) == 1 and sep in str(df.columns[0]):
             cols = str(df.columns[0]).split(sep)
             df = df[df.columns[0]].astype(str).str.split(sep, n=len(cols) - 1, expand=True)
             df.columns = cols
-        return [{k: (None if v is None else str(v)) for k, v in r.items()} for r in df.to_dict("records")]
-    # CSV/TSV
+        yield from ({k: (None if v is None else str(v)) for k, v in r.items()}
+                    for r in df.to_dict("records"))
+        return
+    # CSV/TSV — streaming: no materializa en RAM, compatible con ficheros >500 MB
     delim = sep if sep else ","
     with open(path, newline="", encoding="utf-8", errors="replace") as f:
-        return list(csv.DictReader(f, delimiter=delim))
+        yield from csv.DictReader(f, delimiter=delim)
 
 def ingest(paths, mapping, sep, action_const, db):
     """mapping: dict role->columna (entity, ts, ip, action, status). Crea tabla events."""
@@ -719,6 +720,10 @@ def main():
     ap.add_argument("--case", default="", metavar="REF"); ap.add_argument("--analyst", default="", metavar="NOMBRE")
     ap.add_argument("--out", default="./forensic_out", metavar="DIR")
     ap.add_argument("--evidence", action="store_true", help="Genera paquete ZIP firmado (MANIFEST.sha256 + cadena de custodia)")
+    ap.add_argument("--stream", action="store_true",
+                    help="Fuerza modo streaming (SQLite en disco temporal): recomendado para "
+                         "fuentes >500 MB; se activa automáticamente si alguna fuente supera "
+                         "ese umbral (v1.3)")
     args = ap.parse_args()
 
     # ── Modo análisis de fichero binario ──────────────────────────────────────
@@ -781,8 +786,38 @@ def main():
     if "entity" not in mapping:
         sys.exit("Falta el mapeo de la entidad: --map entity=<columna>  (o --profile)")
 
-    db = sqlite3.connect(":memory:")
-    n = ingest(args.sources, mapping, sep, action_const, db)
+    # Modo streaming: SQLite en disco si cualquier fuente supera 500 MB
+    # o si el usuario pide --stream explícitamente
+    _STREAM_UMBRAL = 500 * 1024 * 1024  # 500 MB
+    usar_disco = getattr(args, "stream", False) or any(
+        os.path.isfile(p) and os.path.getsize(p) >= _STREAM_UMBRAL
+        for p in args.sources
+    )
+    if usar_disco:
+        import tempfile
+        _db_tmp = tempfile.NamedTemporaryFile(
+            suffix=".sqlite", prefix="vfq_", delete=False
+        )
+        _db_path = _db_tmp.name
+        _db_tmp.close()
+        print(
+            f"[{TOOL}] Modo streaming activado — SQLite en disco: {_db_path}",
+            file=sys.stderr,
+        )
+        db = sqlite3.connect(_db_path)
+    else:
+        _db_path = None
+        db = sqlite3.connect(":memory:")
+
+    try:
+        n = ingest(args.sources, mapping, sep, action_const, db)
+    except Exception:
+        if _db_path:
+            try:
+                os.unlink(_db_path)
+            except OSError:
+                pass
+        raise
     print("[%s] %d eventos normalizados desde %d fuente(s)" % (TOOL, n, len(args.sources)), file=sys.stderr)
 
     res = QUERIES[args.query](db, args)
@@ -799,6 +834,14 @@ def main():
     print("Generado:")
     for k, v in files.items():
         print("  %-5s %s" % (k, v))
+
+    # Limpiar SQLite temporal si se usó modo streaming
+    db.close()
+    if _db_path:
+        try:
+            os.unlink(_db_path)
+        except OSError:
+            pass
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vamp-forensic-query"
-version = "1.2"
+version = "1.3"
 description = "Forensic SQL/log query engine for authorized digital investigations"
 readme = "README.md"
 license = { text = "AGPL-3.0-only" }
