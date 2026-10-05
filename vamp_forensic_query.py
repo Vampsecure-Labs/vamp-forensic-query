@@ -19,7 +19,7 @@ Ejemplos:
 
   # Cronología exacta de una entidad
   vamp_forensic_query.py eventos.xlsx --map entity=Usuario ts=CreatedAt ip=Datos --sep ';' \
-      timeline --entity 11723541G
+      timeline --entity 00000001R
 
   # Reincidentes (>=3 cambios) de cualquier tipo, con evidencia
   vamp_forensic_query.py ... top --action password_change --year 2026 --min-count 3 --evidence
