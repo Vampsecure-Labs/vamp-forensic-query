@@ -92,6 +92,72 @@ No aplica (es una herramienta de consulta/evidencia, no de detección). Compleme
 
 ---
 
+## Sample Output
+
+```
+$ vamp_forensic_query.py Contrasenas.xlsx distinct \
+    --profile cliente.json --year 2026 --entity-type DNI \
+    --case "CASO-2026-001" --analyst "Perito — VampSecure Labs" --evidence
+
+ vamp-forensic-query v1.3 — VampSecure Labs
+ Source: Contrasenas.xlsx  (SHA-256: 3a9f...c204)  |  Rows ingested: 18 432
+ Profile: cliente.json  |  Entity type filter: DNI  |  Year: 2026
+ Case: CASO-2026-001  |  Analyst: Perito — VampSecure Labs
+
+ Query: DISTINCT ─────────────────────────────────────────────────────────────────
+ Entity          Type   Events   IPs   First event           Last event
+ ─────────────────────────────────────────────────────────────────────────────────
+ 11723541G       DNI    14       5     2026-01-14 09:22:03   2026-09-30 17:41:10
+ 28901234A       DNI    9        3     2026-02-03 08:05:52   2026-08-11 16:30:07
+ 47812345B       DNI    7        1     2026-03-22 11:18:44   2026-09-01 09:55:30
+ 52934812C       DNI    4        2     2026-04-17 07:40:12   2026-07-29 14:22:03
+ 63801234D       DNI    3        1     2026-06-08 16:02:55   2026-09-12 10:41:57
+ 74523018E       DNI    2        1     2026-07-23 13:55:01   2026-09-28 08:17:44
+ ─────────────────────────────────────────────────────────────────────────────────
+ Totals: 6 distinct DNI  ·  39 events  ·  sources: 1
+
+ Evidence package written to ./CASO-2026-001/
+   consulta_20261008T091203Z.json
+   consulta_20261008T091203Z.csv
+   consulta_20261008T091203Z.html
+   consulta_20261008T091203Z_evidencia.zip  (MANIFEST.sha256 included)
+```
+
+## Why vamp-forensic-query vs. Splunk · Elastic SIEM · consultas SQL manuales
+
+| Capability | vamp-forensic-query | Splunk | Elastic SIEM | SQL manual |
+|---|---|---|---|---|
+| Zero infrastructure — single Python script | ✅ | ❌ server required | ❌ cluster required | ⚠️ DB required |
+| Chain-of-custody ZIP with SHA-256 manifest | ✅ | ❌ | ❌ | ❌ |
+| ISO 27043 / RFC 3227 compliant evidence output | ✅ | ❌ | ❌ | ❌ |
+| Auto-classification DNI / NIE / CIF / email / IPv4 | ✅ | ❌ manual regex | ❌ manual mapping | ❌ manual |
+| Signed pericial HTML report | ✅ | ❌ | ❌ | ❌ |
+| Ingest CSV + XLSX with column remapping | ✅ | ✅ | ✅ | ⚠️ import step |
+| Streaming for sources >500 MB (zero RAM materialization) | ✅ | ✅ | ✅ | ⚠️ varies |
+| Reproducible query embedded in evidence artefact | ✅ | ❌ | ❌ | ⚠️ manual |
+
+- **Court-ready by design**: every `--evidence` run produces a sealed ZIP with a `MANIFEST.sha256` that cryptographically ties each artefact to the source files; any post-hoc alteration breaks the chain.
+- **No infrastructure, no licence cost**: Splunk and Elastic require servers, ingestion pipelines, and licence agreements that take days to procure in an incident response scenario. `vamp-forensic-query` runs on a laptop in under a minute.
+- **Entity-type awareness**: automatic classification of DNI, NIE, CIF, email, and IPv4 means investigators can ask "how many distinct DNIs?" without writing regex or custom ETL.
+- **Pericial report as first-class output**: the generated HTML includes the exact query, methodology, legal disclaimer, and custody chain — ready to attach to a judicial proceeding without further editing.
+
+## Check Coverage
+
+| Check ID | Description | Standard | Severity |
+|---|---|---|---|
+| FQ-001 | Source file SHA-256 computed and recorded in chain-of-custody | ISO 27043 §10, RFC 3227 §2.2 | INFO |
+| FQ-002 | MANIFEST.sha256 generated and verified for all evidence artefacts | ISO 27043 §11 | INFO |
+| FQ-003 | Entity auto-classification: DNI pattern (8 digits + checksum letter) | ISO 27043 §8 | INFO |
+| FQ-004 | Entity auto-classification: NIE (X/Y/Z + 7 digits + letter) | ISO 27043 §8 | INFO |
+| FQ-005 | Entity auto-classification: CIF (letter + 7 digits + control character) | ISO 27043 §8 | INFO |
+| FQ-006 | Entity auto-classification: email address (RFC 5321 pattern) | ISO 27043 §8 | INFO |
+| FQ-007 | Entity auto-classification: IPv4 address | ISO 27043 §8 | INFO |
+| FQ-008 | Reproducible query string embedded in JSON evidence artefact | RFC 3227 §2.1 | INFO |
+| FQ-009 | Streaming mode activated for sources ≥ 500 MB (zero RAM materialization) | ISO 27043 §9 | INFO |
+| FQ-010 | `--sql` mode enforces SELECT-only (INSERT/UPDATE/DELETE/DROP rejected) | ISO 27043 §10 | HIGH |
+
+---
+
 ## Historial de versiones
 
 | Versión | Cambios principales |
