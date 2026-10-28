@@ -51,7 +51,7 @@ BANNER = (
     " \\ V / _ \\| |\\/| |  _/\\__ \\ _| (__| |_| |   / _|| |__ / _ \\| _ \\__ \\\n"
     "  \\_/_/ \\_\\_|  |_|_|  |___/___\\___|\\___/|_|_\\___|____/_/ \\_\\___/___/\n"
     '  by Antonio Hernandez "Belky" — VampSecure Studios\n'
-    "  vamp-forensic-query v1.2 · Forensic Query Engine + Binary Analysis\n"
+    "  vamp-forensic-query v1.3 · Forensic Query Engine + Binary Analysis\n"
     "  ────────────────────────────────────────────────────────────────────────\n"
     "  USO EXCLUSIVO EN AUDITORÍAS AUTORIZADAS · El uso no autorizado es ilegal\n"
 )

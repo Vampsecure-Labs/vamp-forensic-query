@@ -101,7 +101,7 @@ $ vamp_forensic_query.py Passwords.xlsx distinct \
     --profile client.json --year 2026 --entity-type DNI \
     --case "CASE-2026-001" --analyst "Expert — VampSecure Labs" --evidence
 
- vamp-forensic-query v1.4 — VampSecure Labs
+ vamp-forensic-query v1.3 — VampSecure Labs
  Source: Passwords.xlsx  (SHA-256: 3a9f...c204)  |  Rows ingested: 18 432
  Profile: client.json  |  Entity type filter: DNI  |  Year: 2026
  Case: CASE-2026-001  |  Analyst: Expert — VampSecure Labs
@@ -268,7 +268,7 @@ $ vamp_forensic_query.py Contrasenas.xlsx distinct \
     --profile cliente.json --year 2026 --entity-type DNI \
     --case "CASO-2026-001" --analyst "Perito — VampSecure Labs" --evidence
 
- vamp-forensic-query v1.4 — VampSecure Labs
+ vamp-forensic-query v1.3 — VampSecure Labs
  Source: Contrasenas.xlsx  (SHA-256: 3a9f...c204)  |  Rows ingested: 18 432
  Profile: cliente.json  |  Entity type filter: DNI  |  Year: 2026
  Case: CASO-2026-001  |  Analyst: Perito — VampSecure Labs
